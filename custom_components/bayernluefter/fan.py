@@ -66,21 +66,29 @@ class BayernluefterFan(FanEntity):
         )
 
     @property
-    def is_on(self):
+    def async_is_on(self):
         """Return true if device is on."""
-        return self._current_speed() > 0
+        return self._bayernluefter.raw_converted()["_SystemOn"]
 
     async def async_set_percentage(self, percentage: int) -> None:
-        await self._bayernluefter.set_speed(
-            int(percentage_to_ranged_value(BAYERNLUEFTER_SPEED_RANGE, percentage))
+        _LOGGER.error(percentage)
+        if (percentage == 0):
+            await self._bayernluefter.set_speed(1)
+        else:
+            await self._bayernluefter.set_speed(
+                int(percentage_to_ranged_value(BAYERNLUEFTER_SPEED_RANGE, percentage))
         )
 
     async def async_turn_off(self, **kwargs):
-        await self._bayernluefter.set_speed(0)
+        _LOGGER.error("setting OFF")
+        await self._bayernluefter.power_off()
 
-    async def async_turn_on(self, percentage: Optional[int] = None, **kwargs):
-        await self.async_set_speed(percentage if percentage is not None else 50)
+    async def async_turn_on(self, **kwargs):
+        await self._bayernluefter.power_on()
 
     @property
     def supported_features(self) -> int:
         return SUPPORT_SET_SPEED
+
+    async def async_update(self):
+        await self._bayernluefter.update()

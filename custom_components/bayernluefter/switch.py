@@ -32,8 +32,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     name = discovery_info["name"]
     bayernluefter = hass.data[domain][name]
     ent = [
-        BayernluefterPowerSwitch(name=f"{name} Power", bayernluefter=bayernluefter),
-        BayernluefterTimerSwitch(name=f"{name} Timer", bayernluefter=bayernluefter),
+        BayernluefterPowerSwitch(name=f"{name} Power", bayernluefter=bayernluefter)
     ]
     async_add_entities(ent)
 
@@ -56,46 +55,25 @@ class BayernluefterPowerSwitch(SwitchEntity):
     @property
     def is_on(self):
         """Return true if device is on."""
-        try:
-            return self._bayernluefter.raw_converted()["_SystemOn"]
-        except KeyError:
-            return STATE_UNKNOWN
+        _LOGGER.error("switch isOn")
+        _LOGGER.error(self._bayernluefter.raw_converted())
+        return self._bayernluefter.raw_converted()["_SystemOn"]
 
     async def async_turn_on(self, **kwargs):
         """Turn the device on."""
+        _LOGGER.error("switch turn_on")
         await self._bayernluefter.power_on()
         """self._assumed_state = True"""
 
     async def async_turn_off(self, **kwargs):
         """Turn the device off."""
+        _LOGGER.error("switch turn_off")
         await self._bayernluefter.power_off()
 
     async def async_toggle(self, **kwargs):
-        await self._bayernluefter.power_toggle()
-
-
-class BayernluefterTimerSwitch(SwitchEntity):
-    """
-    Representation of a switch that toggles a digital output of the UVR1611.
-    """
-
-    def __init__(self, name, bayernluefter: Bayernluefter):
-        """Initialize the switch."""
-        self._bayernluefter = bayernluefter
-        self._name = name
-
-    @property
-    def name(self):
-        """Return the name of the switch."""
-        return self._name
-
-    @property
-    def is_on(self):
-        """Return true if device is on."""
-        try:
-            return self._bayernluefter.raw_converted()["_MaxMode"]
-        except KeyError:
-            return STATE_UNKNOWN
-
-    async def async_toggle(self, **kwargs):
-        await self._bayernluefter.timer_toggle()
+        _LOGGER.error("switch toggle")
+        await self._bayernluefter.button_power()
+        
+    async def async_update(self):
+        _LOGGER.error("switch update")
+        await self._bayernluefter.update()
